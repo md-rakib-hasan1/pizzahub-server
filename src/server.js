@@ -2,6 +2,7 @@
 import "dotenv/config";
 import verifyJWT from "./middleware/verifyJWT.js";
 import verifyRole from "./middleware/verifyRole.js";
+import verifyActiveUser from "./middleware/verifyActiveUser.js";
 import express from "express";
 import cors from "cors";
 
@@ -26,7 +27,7 @@ app.get("/", (req, res) => {
   res.status(200).send("PizzaHub API is running!");
 });
 
-app.get("/api/protected", verifyJWT, (req, res) => {
+app.get("/api/protected", verifyActiveUser, verifyJWT, (req, res) => {
   res.status(200).json({
     success: true,
     message: "JWT verified successfully!",
@@ -35,7 +36,7 @@ app.get("/api/protected", verifyJWT, (req, res) => {
 });
 
 // Customer only
-app.get("/api/customer-only", verifyJWT, verifyRole("customer"), (req, res) => {
+app.get("/api/customer-only", verifyJWT, verifyActiveUser, verifyRole("customer"), (req, res) => {
   res.status(200).json({
     success: true,
     message: "Welcome Customer!",
@@ -44,7 +45,7 @@ app.get("/api/customer-only", verifyJWT, verifyRole("customer"), (req, res) => {
 });
 
 // Vendor only
-app.get("/api/vendor-only", verifyJWT, verifyRole("vendor"), (req, res) => {
+app.get("/api/vendor-only", verifyJWT, verifyActiveUser, verifyRole("vendor"), (req, res) => {
   res.status(200).json({
     success: true,
     message: "Welcome Vendor!",
@@ -53,7 +54,7 @@ app.get("/api/vendor-only", verifyJWT, verifyRole("vendor"), (req, res) => {
 });
 
 // Admin only
-app.get("/api/admin-only", verifyJWT, verifyRole("admin"), (req, res) => {
+app.get("/api/admin-only", verifyJWT, verifyActiveUser, verifyRole("admin"), (req, res) => {
   res.status(200).json({
     success: true,
     message: "Welcome Admin!",
