@@ -60,7 +60,8 @@ app.get("/api/admin-only", verifyJWT, verifyActiveUser, verifyRole("admin"), (re
     message: "Welcome Admin!",
     user: req.user,
   });
-});
+}); 
+
 
 const startServer = async () => {
   try {
