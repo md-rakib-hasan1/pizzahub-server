@@ -1,5 +1,5 @@
-
 import "dotenv/config";
+import menuRoutes from "./routes/menu.routes.js";
 import verifyJWT from "./middleware/verifyJWT.js";
 import verifyRole from "./middleware/verifyRole.js";
 import verifyActiveUser from "./middleware/verifyActiveUser.js";
@@ -21,6 +21,8 @@ app.use(
 );
 
 app.use(express.json());
+
+app.use("/api/menu-items", menuRoutes);
 
 // Health check route
 app.get("/", (req, res) => {
