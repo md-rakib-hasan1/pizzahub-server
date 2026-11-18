@@ -1,6 +1,7 @@
 
 import "dotenv/config";
-
+import verifyJWT from "./middleware/verifyJWT.js";
+import verifyRole from "./middleware/verifyRole.js";
 import express from "express";
 import cors from "cors";
 
@@ -23,6 +24,41 @@ app.use(express.json());
 // Health check route
 app.get("/", (req, res) => {
   res.status(200).send("PizzaHub API is running!");
+});
+
+app.get("/api/protected", verifyJWT, (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "JWT verified successfully!",
+    user: req.user,
+  });
+});
+
+// Customer only
+app.get("/api/customer-only", verifyJWT, verifyRole("customer"), (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Welcome Customer!",
+    user: req.user,
+  });
+});
+
+// Vendor only
+app.get("/api/vendor-only", verifyJWT, verifyRole("vendor"), (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Welcome Vendor!",
+    user: req.user,
+  });
+});
+
+// Admin only
+app.get("/api/admin-only", verifyJWT, verifyRole("admin"), (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Welcome Admin!",
+    user: req.user,
+  });
 });
 
 const startServer = async () => {
