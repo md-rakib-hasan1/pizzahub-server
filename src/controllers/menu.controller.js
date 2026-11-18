@@ -142,3 +142,44 @@ export const getMyMenuItems = async (req, res) => {
     });
   }
 };
+
+
+//update menu
+export const updateMenuItem = async (req, res) => {
+  try {
+    const db = getDB();
+
+    const updateData = {
+      ...req.body,
+      updatedAt: new Date(),
+    };
+
+    await db.collection("menuItems").updateOne(
+      {
+        _id: req.resource._id,
+      },
+      {
+        $set: updateData,
+      }
+    );
+
+    const updatedMenuItem = await db
+      .collection("menuItems")
+      .findOne({
+        _id: req.resource._id,
+      });
+
+    res.status(200).json({
+      success: true,
+      message: "Menu item updated successfully.",
+      data: updatedMenuItem,
+    });
+  } catch (error) {
+    console.error("Update menu item error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update menu item.",
+    });
+  }
+};
