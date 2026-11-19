@@ -51,3 +51,36 @@ export const updateMenuSchema = createMenuSchema
             message: "At least one field is required for update.",
         }
     );
+
+export const reviewMenuSchema = z.object({
+    approvalStatus: z.enum(
+        ["approved", "rejected"],
+        {
+            message: "Status must be approved or rejected.",
+        }
+    ),
+});
+
+export const menuQuerySchema = z.object({
+    search: z.string().trim().optional(),
+    category: z.string().trim().optional(),
+    location: z.string().trim().optional(),
+
+    sort: z
+        .enum(["price_asc", "price_desc", "newest"])
+        .optional(),
+
+    page: z
+        .string()
+        .regex(/^[1-9]\d*$/, "Page must be a positive integer.")
+        .optional(),
+
+    limit: z
+        .string()
+        .regex(/^[1-9]\d*$/, "Limit must be a positive integer.")
+        .refine(
+            (value) => Number(value) <= 50,
+            "Limit cannot exceed 50."
+        )
+        .optional(),
+});
