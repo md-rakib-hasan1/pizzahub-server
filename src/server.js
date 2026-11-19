@@ -3,6 +3,14 @@ import menuRoutes from "./routes/menu.routes.js";
 import verifyJWT from "./middleware/verifyJWT.js";
 import verifyRole from "./middleware/verifyRole.js";
 import verifyActiveUser from "./middleware/verifyActiveUser.js";
+import imageRoutes from "./routes/image.routes.js";
+import orderRoutes from "./routes/order.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import transactionRoutes from "./routes/transaction.routes.js";
+import subscriptionRoutes from "./routes/subscription.routes.js";
+import webhookRoutes from "./routes/webhook.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
+
 import express from "express";
 import cors from "cors";
 
@@ -20,16 +28,32 @@ app.use(
   })
 );
 
+// Stripe webhook must receive the raw request body
+app.use(
+  "/api/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  webhookRoutes
+);
+
+// Other routes use JSON parser
 app.use(express.json());
 
+//route mount handle
+
+app.use("/api/images", imageRoutes);
 app.use("/api/menu-items", menuRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/transactions", transactionRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Health check route
 app.get("/", (req, res) => {
   res.status(200).send("PizzaHub API is running!");
 });
 
-app.get("/api/protected", verifyActiveUser, verifyJWT, (req, res) => {
+app.get("/api/protected", verifyJWT, verifyActiveUser, (req, res) => {
   res.status(200).json({
     success: true,
     message: "JWT verified successfully!",
