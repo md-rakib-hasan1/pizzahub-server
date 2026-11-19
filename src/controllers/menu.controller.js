@@ -424,6 +424,7 @@ export const getFeaturedMenuItems = async (req, res) => {
                     $match: {
                         approvalStatus: "approved",
                         isAvailable: true,
+                        isFeatured: true,
                     },
                 },
                 {
