@@ -268,6 +268,7 @@ export const getAdminRecentTransactions = async (req, res) => {
 };
 
 
+
 export const getVendorMonthlyOrders = async (req, res) => {
     try {
         const db = getDB();
@@ -304,8 +305,18 @@ export const getVendorMonthlyOrders = async (req, res) => {
                 {
                     $project: {
                         _id: 0,
-                        year: "$_id.year",
-                        month: "$_id.month",
+                        month: {
+                            $dateToString: {
+                                format: "%b %Y",
+                                date: {
+                                    $dateFromParts: {
+                                        year: "$_id.year",
+                                        month: "$_id.month",
+                                        day: 1,
+                                    },
+                                },
+                            },
+                        },
                         totalOrders: 1,
                     },
                 },
@@ -353,7 +364,7 @@ export const getVendorMonthlyRevenue = async (req, res) => {
                             year: { $year: "$createdAt" },
                             month: { $month: "$createdAt" },
                         },
-                        totalRevenue: { $sum: "$price" },
+                        revenue: { $sum: "$price" },
                     },
                 },
                 {
@@ -365,9 +376,19 @@ export const getVendorMonthlyRevenue = async (req, res) => {
                 {
                     $project: {
                         _id: 0,
-                        year: "$_id.year",
-                        month: "$_id.month",
-                        totalRevenue: { $round: ["$totalRevenue", 2] },
+                        month: {
+                            $dateToString: {
+                                format: "%b %Y",
+                                date: {
+                                    $dateFromParts: {
+                                        year: "$_id.year",
+                                        month: "$_id.month",
+                                        day: 1,
+                                    },
+                                },
+                            },
+                        },
+                        revenue: { $round: ["$revenue", 2] },
                     },
                 },
             ])
