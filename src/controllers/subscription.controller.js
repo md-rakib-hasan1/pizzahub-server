@@ -61,9 +61,9 @@ export const createPremiumCheckout = async (req, res) => {
                 },
             },
 
-            success_url: `${clientURL}/dashboard/vendor/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+            success_url: `${clientURL}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
 
-            cancel_url: `${clientURL}/dashboard/vendor/subscription/cancel`,
+            cancel_url: `${clientURL}/subscription/cancel`,
         });
 
         res.status(200).json({
@@ -116,22 +116,76 @@ export const cancelPremiumSubscription = async (req, res) => {
             }
         );
 
-        res.status(200).json({
+        const subscriptionExpiresAt = new Date(
+            subscription.current_period_end * 1000
+        );
+
+        await db.collection("user").updateOne(
+            { _id: vendor._id },
+            {
+                $set: {
+                    cancelAtPeriodEnd: subscription.cancel_at_period_end,
+                    subscriptionExpiresAt,
+                },
+            }
+        );
+
+        return res.status(200).json({
             success: true,
             message: "Subscription cancellation scheduled successfully.",
             data: {
                 cancelAtPeriodEnd: subscription.cancel_at_period_end,
-                subscriptionExpiresAt: new Date(
-                    subscription.current_period_end * 1000
-                ),
+                subscriptionExpiresAt,
             },
         });
     } catch (error) {
         console.error("Cancel subscription error:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Failed to cancel subscription.",
         });
     }
 };
+
+
+export const getSubscriptionStatus = async (req, res) => {
+    try {
+        const db = getDB();
+
+        const vendor = await db.collection("user").findOne(
+            { email: req.user.email },
+            {
+                projection: {
+                    subscriptionPlan: 1,
+                    cancelAtPeriodEnd: 1,
+                    subscriptionExpiresAt: 1,
+                },
+            }
+        );
+
+        if (!vendor) {
+            return res.status(404).json({
+                success: false,
+                message: "Vendor account not found.",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                subscriptionPlan: vendor.subscriptionPlan,
+                cancelAtPeriodEnd: vendor.cancelAtPeriodEnd === true,
+                subscriptionExpiresAt: vendor.subscriptionExpiresAt || null,
+            },
+        });
+    } catch (error) {
+        console.error("Get subscription status error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to get subscription status.",
+        });
+    }
+};
+

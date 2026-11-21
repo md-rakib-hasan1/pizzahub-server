@@ -8,6 +8,7 @@ import verifyRole from "../middleware/verifyRole.js";
 import {
     createPremiumCheckout,
     cancelPremiumSubscription,
+    getSubscriptionStatus,
 } from "../controllers/subscription.controller.js";
 
 const router = Router();
@@ -21,12 +22,20 @@ router.post(
     createPremiumCheckout,
 );
 
+router.get(
+    "/status",
+    verifyJWT,
+    verifyActiveUser,
+    verifyRole("vendor"),
+    getSubscriptionStatus
+);
+
 router.patch(
-  "/cancel",
-  verifyJWT,
-  verifyActiveUser,
-  verifyRole("vendor"),
-  cancelPremiumSubscription
+    "/cancel",
+    verifyJWT,
+    verifyActiveUser,
+    verifyRole("vendor"),
+    cancelPremiumSubscription
 );
 
 export default router;
